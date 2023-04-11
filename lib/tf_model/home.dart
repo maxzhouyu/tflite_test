@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
+import 'package:tflite_test/tf_model/camera.dart';
+import 'package:tflite_test/tf_model/models.dart';
 import 'dart:math' as math;
 
-import 'camera.dart';
 import 'bndbox.dart';
-import 'models.dart';
 
 class HomePage extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
   HomePage(this.cameras);
 
   @override
-  _HomePageState createState() => new _HomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    onSelect(yolo);
   }
 
   loadModel() async {
@@ -53,7 +54,7 @@ class _HomePageState extends State<HomePage> {
             model: "assets/ssd_mobilenet.tflite",
             labels: "assets/ssd_mobilenet.txt"))!;
     }
-    print(res);
+    debugPrint(res);
   }
 
   onSelect(model) {
@@ -75,46 +76,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     Size screen = MediaQuery.of(context).size;
     return Scaffold(
-      body: _model == ""
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    child: const Text(ssd),
-                    onPressed: () => onSelect(ssd),
-                  ),
-                  ElevatedButton(
-                    child: const Text(yolo),
-                    onPressed: () => onSelect(yolo),
-                  ),
-                  ElevatedButton(
-                    child: const Text(mobilenet),
-                    onPressed: () => onSelect(mobilenet),
-                  ),
-                  ElevatedButton(
-                    child: const Text(posenet),
-                    onPressed: () => onSelect(posenet),
-                  ),
-                ],
-              ),
-            )
-          : Stack(
-              children: [
-                Camera(
-                  widget.cameras,
-                  _model,
-                  setRecognitions,
-                ),
-                BndBox(
-                    _recognitions == null ? [] : _recognitions!,
-                    math.max(_imageHeight, _imageWidth),
-                    math.min(_imageHeight, _imageWidth),
-                    screen.height,
-                    screen.width,
-                    _model),
-              ],
-            ),
+      body: Stack(
+        children: [
+          Camera(
+            widget.cameras,
+            _model,
+            setRecognitions,
+          ),
+          BndBox(
+              _recognitions == null ? [] : _recognitions!,
+              math.max(_imageHeight, _imageWidth),
+              math.min(_imageHeight, _imageWidth),
+              screen.height,
+              screen.width,
+              _model),
+        ],
+      ),
     );
   }
 }
